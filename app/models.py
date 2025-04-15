@@ -6,7 +6,7 @@ class Checklist(Base):
     __tablename__ = "checklists"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-
+    
     categories = relationship("Category", back_populates="checklist", cascade="all, delete-orphan")
 
 class Category(Base):
