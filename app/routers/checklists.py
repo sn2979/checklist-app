@@ -119,7 +119,14 @@ def delete_item(item_id: int, db: Session = Depends(get_db)):
     return item
 
 @router.delete("/{checklist_id}/categories/{category_id}/items/{item_id}/files/{file_id}", response_model=schemas.FileOut)
-def delete_file(file_id: int, db: Session = Depends(get_db)):
+def delete_item_file(file_id: int, db: Session = Depends(get_db)):
+    file = crud.delete_file(db, file_id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    return file
+
+@router.delete("/{checklist_id}/categories/{category_id}/files/{file_id}", response_model=schemas.FileOut)
+def delete_category_file(file_id: int, db: Session = Depends(get_db)):
     file = crud.delete_file(db, file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")

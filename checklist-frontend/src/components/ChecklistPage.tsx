@@ -48,7 +48,30 @@ const ChecklistPage: React.FC = () => {
         console.error("File upload error:", error);
       });
   };
-  
+
+  const deleteItemFile = (checklistId: number, categoryId: number, itemId: number, fileId: number) => {
+    axios.delete(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/items/${itemId}/files/${fileId}`)
+      .then(() => {
+        // Refetch the checklist after deletion
+        axios.get(`http://localhost:8000/checklists/${id}`)
+          .then(res => setChecklist(res.data));
+      })
+      .catch(error => {
+        console.error("Error deleting file:", error);
+      });
+  };
+
+  const deleteCategoryFile = (checklistId: number, categoryId: number, fileId: number) => {
+    axios.delete(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/files/${fileId}`)
+      .then(() => {
+        // Refetch the checklist after deletion
+        axios.get(`http://localhost:8000/checklists/${id}`)
+          .then(res => setChecklist(res.data));
+      })
+      .catch(error => {
+        console.error("Error deleting file:", error);
+      });
+  };
   
 
   return (
@@ -74,7 +97,15 @@ const ChecklistPage: React.FC = () => {
           {category.files.length > 0 && (
             <ul>
               {category.files.map(file => (
-                <li key={file.id}><a href={file.file_url}>{file.file_url}</a></li>
+                <li key={file.id}><a href={file.file_url}>{file.file_url}</a>
+                <a href={file.file_url} target="_blank" rel="noopener noreferrer">{file.file_url}</a>
+                <button
+                  className="btn btn-sm btn-outline-danger ms-2"
+                  onClick={() => deleteCategoryFile(checklist.id, category.id, file.id)}
+                >
+                  🗑️
+                </button>
+                </li>
               ))}
             </ul>
           )}
@@ -96,7 +127,16 @@ const ChecklistPage: React.FC = () => {
                 {item.files.length > 0 && (
                   <ul>
                     {item.files.map(file => (
-                      <li key={file.id}><a href={file.file_url}>{file.file_url}</a></li>
+                      <li key={file.id} className="d-flex justify-content-between align-items-center">
+                      <a href={file.file_url} target="_blank" rel="noopener noreferrer">{file.file_url}</a>
+                      <button
+                        className="btn btn-sm btn-outline-danger ms-2"
+                        onClick={() => deleteItemFile(checklist.id, category.id, item.id, file.id)}
+                      >
+                        🗑️
+                      </button>
+                    </li>
+                    
                     ))}
                   </ul>
                 )}
