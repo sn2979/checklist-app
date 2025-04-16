@@ -6,6 +6,8 @@ import { Checklist } from '../types/models';
 const ChecklistPage: React.FC = () => {
   const { id } = useParams();  // React Router grabs the ID from the URL
   const [checklist, setChecklist] = useState<Checklist | null>(null);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [itemInputs, setItemInputs] = useState<{ [categoryId: number]: string }>({});
 
   useEffect(() => {
     axios.get(`http://127.0.0.1:8000/checklists/${id}`)
@@ -19,6 +21,33 @@ const ChecklistPage: React.FC = () => {
   }, [id]);
 
   if (!checklist) return <div className="container mt-4">Loading...</div>;
+
+  const handleAddCategory = () => {
+    if (!newCategoryName) return;
+
+    axios.post(`http://localhost:8000/checklists/${id}/categories/`, {
+        name: newCategoryName,
+    }).then(() => {
+        setNewCategoryName("");
+        axios.get(`http://localhost:8000/checklists/${id}`)
+        .then(res => setChecklist(res.data));
+    });
+   };
+
+   const handleAddItem = (checklistId: number, categoryId: number) => {
+    const name = itemInputs[categoryId];
+    if (!name) return;
+  
+    axios.post(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/items/`, {
+      name: name
+    }).then(() => {
+      setItemInputs({ ...itemInputs, [categoryId]: "" });
+      axios.get(`http://localhost:8000/checklists/${id}`)
+        .then(res => setChecklist(res.data));
+    });
+  };
+  
+
 
   const uploadItemFile = (checklistId: number, categoryId: number, itemId: number, file: File) => {
     const formData = new FormData();
@@ -78,15 +107,49 @@ const ChecklistPage: React.FC = () => {
         console.error("Error deleting file:", error);
       });
   };
+
+  const deleteCategory = (checklistId: number, categoryId: number) => {
+    if (!window.confirm("Are you sure you want to delete this category?")) return;
   
+    axios.delete(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}`)
+      .then(() => axios.get(`http://localhost:8000/checklists/${id}`))
+      .then(res => setChecklist(res.data));
+  };
+  
+  const deleteItem = (checklistId: number, categoryId: number, itemId: number) => {
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+  
+    axios.delete(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/items/${itemId}`)
+      .then(() => axios.get(`http://localhost:8000/checklists/${id}`))
+      .then(res => setChecklist(res.data));
+  };
 
   return (
     <div className="container mt-4">
       <h2>{checklist.name}</h2>
+      <div className="d-flex mb-3">
+        <input
+            className="form-control me-2"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            placeholder="New category name"
+        />
+        <button className="btn btn-primary" onClick={handleAddCategory}>Add Category</button>
+       </div>
+
 
       {checklist.categories.map(category => (
         <div key={category.id} className="mb-4">
-          <h4>📂 {category.name}</h4>
+          <h4>📂 {category.name}
+            <button
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={() => deleteCategory(checklist.id, category.id)}
+                >
+                🗑️
+            </button>
+          </h4>
+          
+
           <input
             type="file"
             onChange={(e) => {
@@ -116,10 +179,32 @@ const ChecklistPage: React.FC = () => {
             </ul>
           )}
 
+        <div className="d-flex mt-2">
+            <input
+                className="form-control me-2"
+                value={itemInputs[category.id] || ""}
+                onChange={(e) => setItemInputs({ ...itemInputs, [category.id]: e.target.value })}
+                placeholder="New item name"
+            />
+            <button
+                className="btn btn-success"
+                onClick={() => handleAddItem(checklist.id, category.id)}
+            >
+                Add Item
+            </button>
+        </div>
+
           <ul className="list-group">
             {category.items.map(item => (
               <li key={item.id} className="list-group-item">
                 <strong>{item.name}</strong>
+                <button
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={() => deleteItem(checklist.id, category.id, item.id)}
+                >
+                🗑️
+                </button>
+
                 <input
                     type="file"
                     onChange={(e) => {
@@ -130,6 +215,7 @@ const ChecklistPage: React.FC = () => {
                     }}
                     className="form-control form-control-sm mt-2"
                 />
+
                 {item.files.length > 0 && (
                   <ul>
                     {item.files.map(file => (
