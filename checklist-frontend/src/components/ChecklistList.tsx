@@ -6,6 +6,9 @@ import { Checklist } from '../types/models';
 const ChecklistList: React.FC = () => {
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [newName, setNewName] = useState("");
+  const [renamingChecklistId, setRenamingChecklistId] = useState<number | null>(null);
+  const [renamingChecklistName, setRenamingChecklistName] = useState<string>("");
+
 
   // Fetch all checklists from backend
   useEffect(() => {
@@ -18,6 +21,24 @@ const ChecklistList: React.FC = () => {
         console.error("Error fetching checklists:", error);
       });
   }, []);
+
+  const toggleRenameChecklist = (checklistId: number, currentName: string) => {
+    setRenamingChecklistId(checklistId);
+    setRenamingChecklistName(currentName);
+  };
+  
+  const handleRenameChecklist = (checklistId: number) => {
+    axios.put(`http://localhost:8000/checklists/${checklistId}`, {
+      name: renamingChecklistName,
+    }).then((res) => {
+      setChecklists(checklists.map(cl =>
+        cl.id === checklistId ? res.data : cl
+      ));
+      setRenamingChecklistId(null);
+      setRenamingChecklistName("");
+    });
+  };
+  
 
   const createChecklist = () => {
     if (!newName) return;
@@ -54,9 +75,34 @@ const ChecklistList: React.FC = () => {
           <div className="col-md-4" key={checklist.id}>
             <div className="card mb-3">
               <div className="card-body">
-                <h5 className="card-title">
-                  <Link to={`/checklists/${checklist.id}`}>{checklist.name}</Link>
-                </h5>
+              {renamingChecklistId === checklist.id ? (
+                <div className="d-flex">
+                    <input
+                    className="form-control me-2"
+                    value={renamingChecklistName}
+                    onChange={(e) => setRenamingChecklistName(e.target.value)}
+                    />
+                    <button
+                    className="btn btn-success btn-sm"
+                    onClick={() => handleRenameChecklist(checklist.id)}
+                    >
+                    Save
+                    </button>
+                </div>
+                ) : (
+                <>
+                    <h5 className="card-title">
+                    <Link to={`/checklists/${checklist.id}`}>{checklist.name}</Link>
+                    <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => toggleRenameChecklist(checklist.id, checklist.name)}
+                    >
+                     ✏️ 
+                    </button>
+                    </h5>
+                    
+                </>
+                )}
                 <div className="d-flex gap-2">
                   <button className="btn btn-sm btn-danger" onClick={() => deleteChecklist(checklist.id)}>Delete</button>
                   {/* Buttons for Rename & Clone can go here */}

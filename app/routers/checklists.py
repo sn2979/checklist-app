@@ -134,21 +134,21 @@ def delete_category_file(file_id: int, db: Session = Depends(get_db)):
 
 # rename routes
 @router.put("/{checklist_id}", response_model=schemas.ChecklistOut)
-def rename_checklist(checklist_id: int, new_name: str = Form(...), db: Session = Depends(get_db)):
+def rename_checklist(checklist_id: int, new_name: schemas.RenameRequest, db: Session = Depends(get_db)):
     checklist = crud.rename_checklist(db, checklist_id, new_name)
     if not checklist:
         raise HTTPException(status_code=404, detail="Checklist not found")
     return checklist
 
 @router.put("/{checklist_id}/categories/{category_id}", response_model=schemas.CategoryOut)
-def rename_category(category_id: int, new_name: str = Form(...), db: Session = Depends(get_db)):
+def rename_category(category_id: int, new_name: schemas.RenameRequest, db: Session = Depends(get_db)):
     category = crud.rename_category(db, category_id, new_name)
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
     return category
 
 @router.put("/{checklist_id}/categories/{category_id}/items/{item_id}", response_model=schemas.ItemOut)
-def rename_item(item_id: int, new_name: str = Form(...), db: Session = Depends(get_db)):
+def rename_item(item_id: int, new_name: schemas.RenameRequest, db: Session = Depends(get_db)):
     item = crud.rename_item(db, item_id, new_name)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")

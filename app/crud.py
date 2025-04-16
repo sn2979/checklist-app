@@ -111,26 +111,26 @@ def get_item(db: Session, item_id: int):
     return db.query(models.Item).filter(models.Item.id == item_id).first()
 
 # renaming functions
-def rename_checklist(db: Session, checklist_id: int, new_name: str):
+def rename_checklist(db: Session, checklist_id: int, new_name: schemas.RenameRequest):
     db_checklist = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
     if db_checklist:
-        db_checklist.name = new_name
+        db_checklist.name = new_name.name
         db.commit()
         db.refresh(db_checklist)
     return db_checklist
 
-def rename_category(db: Session, category_id: int, new_name: str):
+def rename_category(db: Session, category_id: int, new_name: schemas.RenameRequest):
     db_category = db.query(models.Category).filter(models.Category.id == category_id).first()
     if db_category:
-        db_category.name = new_name
+        db_category.name = new_name.name
         db.commit()
         db.refresh(db_category)
     return db_category
 
-def rename_item(db: Session, item_id: int, new_name: str):
+def rename_item(db: Session, item_id: int, new_name: schemas.RenameRequest):
     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
     if db_item:
-        db_item.name = new_name
+        db_item.name = new_name.name
         db.commit()
         db.refresh(db_item)
     return db_item

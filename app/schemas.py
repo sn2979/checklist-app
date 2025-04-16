@@ -43,3 +43,6 @@ class ChecklistOut(BaseModel):
     class Config:
         orm_mode = True
 
+class RenameRequest(BaseModel):
+    name: str
+

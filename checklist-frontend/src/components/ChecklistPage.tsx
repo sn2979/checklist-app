@@ -8,12 +8,20 @@ const ChecklistPage: React.FC = () => {
   const [checklist, setChecklist] = useState<Checklist | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [itemInputs, setItemInputs] = useState<{ [categoryId: number]: string }>({});
+  const [renamingCategoryId, setRenamingCategoryId] = useState<number | null>(null);
+  const [renamingCategoryName, setRenamingCategoryName] = useState("");
+  const [renamingItemId, setRenamingItemId] = useState<number | null>(null);
+  const [renamingItemName, setRenamingItemName] = useState("");
+  const [renamingName, setRenamingName] = useState(false);
+  const [checklistName, setChecklistName] = useState("");
+
 
   useEffect(() => {
     axios.get(`http://127.0.0.1:8000/checklists/${id}`)
       .then(response => {
         console.log("Fetched checklist:", response.data);
         setChecklist(response.data);
+        setChecklistName(response.data.name);  // populate editable name
       })
       .catch(error => {
         console.error("Error fetching checklist:", error);
@@ -44,6 +52,49 @@ const ChecklistPage: React.FC = () => {
       setItemInputs({ ...itemInputs, [categoryId]: "" });
       axios.get(`http://localhost:8000/checklists/${id}`)
         .then(res => setChecklist(res.data));
+    });
+  };
+
+  const toggleRenamingCategory = (categoryId: number) => {
+    setRenamingCategoryId(categoryId);
+    const category = checklist?.categories.find(c => c.id === categoryId);
+    setRenamingCategoryName(category?.name || "");
+  };
+  
+  const handleRenameCategory = (checklistId: number, categoryId: number) => {
+    axios.put(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}`, {
+      name: renamingCategoryName
+    }).then(() => {
+      setRenamingCategoryId(null);
+      setRenamingCategoryName("");
+      axios.get(`http://localhost:8000/checklists/${id}`)
+        .then(res => setChecklist(res.data));
+    });
+  };
+
+  const toggleRenamingItem = (itemId: number) => {
+    const foundItem = checklist?.categories.flatMap(c => c.items).find(i => i.id === itemId);
+    setRenamingItemId(itemId);
+    setRenamingItemName(foundItem?.name || "");
+  };
+  
+  const handleRenameItem = (checklistId: number, categoryId: number, itemId: number) => {
+    axios.put(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/items/${itemId}`, {
+      name: renamingItemName
+    }).then(() => {
+      setRenamingItemId(null);
+      setRenamingItemName("");
+      axios.get(`http://localhost:8000/checklists/${id}`)
+        .then(res => setChecklist(res.data));
+    });
+  };
+
+  const handleChecklistRename = () => {
+    axios.put(`http://localhost:8000/checklists/${id}`, {
+      name: checklistName
+    }).then(res => {
+      setChecklist(res.data);
+      setRenamingName(false);
     });
   };
   
@@ -126,7 +177,24 @@ const ChecklistPage: React.FC = () => {
 
   return (
     <div className="container mt-4">
-      <h2>{checklist.name}</h2>
+        {renamingName ? (
+    <div className="d-flex mb-3">
+        <input
+        className="form-control me-2"
+        value={checklistName}
+        onChange={(e) => setChecklistName(e.target.value)}
+        />
+        <button className="btn btn-success" onClick={handleChecklistRename}>Save</button>
+    </div>
+    ) : (
+    <div className="d-flex align-items-center mb-3">
+        <h2 className="me-3">{checklist.name}</h2>
+        <button className="btn btn-sm btn-outline-secondary" onClick={() => setRenamingName(true)}>
+        ✏️ Rename
+        </button>
+    </div>
+    )}
+
       <div className="d-flex mb-3">
         <input
             className="form-control me-2"
@@ -147,7 +215,26 @@ const ChecklistPage: React.FC = () => {
                 >
                 🗑️
             </button>
+            <button
+                className="btn btn-sm btn-outline-secondary ms-2"
+                onClick={() => toggleRenamingCategory(category.id)}
+                >
+                ✏️ Rename
+            </button>
           </h4>
+          {renamingCategoryId === category.id ? (
+        <div className="d-flex my-2">
+            <input
+            className="form-control me-2"
+            value={renamingCategoryName}
+            onChange={(e) => setRenamingCategoryName(e.target.value)}
+            />
+            <button className="btn btn-success" onClick={() => handleRenameCategory(checklist.id, category.id)}>
+            Save
+            </button>
+        </div>
+        ) : null}
+
           
 
           <input
@@ -204,6 +291,26 @@ const ChecklistPage: React.FC = () => {
                 >
                 🗑️
                 </button>
+                <button
+                className="btn btn-sm btn-outline-secondary ms-2"
+                onClick={() => toggleRenamingItem(item.id)}
+                >
+                ✏️ Rename
+                </button>
+
+                {renamingItemId === item.id && (
+                <div className="d-flex mt-2">
+                    <input
+                    className="form-control me-2"
+                    value={renamingItemName}
+                    onChange={(e) => setRenamingItemName(e.target.value)}
+                    />
+                    <button className="btn btn-success" onClick={() => handleRenameItem(checklist.id, category.id, item.id)}>
+                    Save
+                    </button>
+                </div>
+                )}
+
 
                 <input
                     type="file"
