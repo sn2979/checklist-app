@@ -50,6 +50,9 @@ const ChecklistPage: React.FC = () => {
   };
 
   const deleteItemFile = (checklistId: number, categoryId: number, itemId: number, fileId: number) => {
+    const confirmed = window.confirm("Are you sure you want to delete this file?");
+    if (!confirmed) return;
+
     axios.delete(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/items/${itemId}/files/${fileId}`)
       .then(() => {
         // Refetch the checklist after deletion
@@ -62,6 +65,9 @@ const ChecklistPage: React.FC = () => {
   };
 
   const deleteCategoryFile = (checklistId: number, categoryId: number, fileId: number) => {
+    const confirmed = window.confirm("Are you sure you want to delete this file?");
+    if (!confirmed) return;
+
     axios.delete(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/files/${fileId}`)
       .then(() => {
         // Refetch the checklist after deletion
