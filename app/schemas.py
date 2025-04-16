@@ -42,3 +42,4 @@ class ChecklistOut(BaseModel):
 
     class Config:
         orm_mode = True
+

@@ -96,6 +96,8 @@ def delete_file(db: Session, file_id: int):
     return db_file
 
 # get functions
+def get_all_checklists(db: Session):
+    return db.query(models.Checklist).all()
 def get_checklist(db: Session, checklist_id: int):
     return db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
 

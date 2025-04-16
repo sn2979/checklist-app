@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from app import schemas, crud, database
+from typing import List
 
 router = APIRouter(prefix="/checklists", tags=["Checklists"])
 
@@ -12,6 +13,10 @@ def get_db():
         db.close()
 
 # get routes
+@router.get("/", response_model=List[schemas.ChecklistOut])
+def get_checklists(db: Session = Depends(get_db)):
+    return crud.get_all_checklists(db)
+
 @router.get("/{checklist_id}", response_model=schemas.ChecklistOut)
 def read_checklist(checklist_id: int, db: Session = Depends(get_db)):
     checklist = crud.get_checklist(db, checklist_id)
