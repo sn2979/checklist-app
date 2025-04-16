@@ -19,6 +19,13 @@ def read_checklist(checklist_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Checklist not found")
     return checklist
 
+@router.get("/public/{public_id}", response_model=schemas.ChecklistOut)
+def get_public_checklist(public_id: str, db: Session = Depends(get_db)):
+    checklist = crud.get_public_checklist(db, public_id)
+    if not checklist:
+        raise HTTPException(status_code=404, detail="Checklist not found")
+    return checklist
+
 # add routes
 @router.post("/", response_model=schemas.ChecklistOut)
 def create_checklist(checklist: schemas.ChecklistCreate, db: Session = Depends(get_db)):
@@ -58,6 +65,24 @@ async def upload_category_file(category_id: int, file: UploadFile = File(...), d
     mock_url = f"/static/uploads/{file.filename}"
     return crud.create_file_url(db, mock_url, category_id=category_id)
 
+@router.post("/public/{public_id}/categories/{category_id}/items/{item_id}/upload", response_model=schemas.FileOut)
+async def public_upload_to_item_file(item_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    item = crud.get_item(db, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    mock_url = f"/static/uploads/{file.filename}"
+    return crud.create_file_url(db, mock_url, item_id=item_id)
+
+@router.post("/public/{public_id}/categories/{category_id}/upload", response_model=schemas.FileOut)
+async def public_upload_to_category_file(category_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    category = crud.get_category(db, category_id)
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    mock_url = f"/static/uploads/{file.filename}"
+    return crud.create_file_url(db, mock_url, category_id=category_id)
+
 # clone checklist
 @router.post("{checklist_id}/clone", response_model=schemas.ChecklistOut)
 def clone_checklist(checklist_id: int, db: Session = Depends(get_db)):
@@ -90,6 +115,13 @@ def delete_item(item_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/{checklist_id}/categories/{category_id}/items/{item_id}/files/{file_id}", response_model=schemas.FileOut)
 def delete_file(file_id: int, db: Session = Depends(get_db)):
+    file = crud.delete_file(db, file_id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    return file
+
+@router.delete("/public/{checklist_id}/categories/{category_id}/items/{item_id}/files/{file_id}", response_model=schemas.FileOut)
+def public_delete_file(file_id: int, db: Session = Depends(get_db)):
     file = crud.delete_file(db, file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")

@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app import models, schemas
+from uuid_extensions import uuid7
 
 # create functions
 def create_checklist(db: Session, checklist: schemas.ChecklistCreate):
@@ -7,6 +8,8 @@ def create_checklist(db: Session, checklist: schemas.ChecklistCreate):
     db.add(db_checklist)
     db.commit()
     db.refresh(db_checklist)
+    db_checklist.public_id = f"{uuid7().hex}"
+    db.commit()
     return db_checklist
 
 def create_category(db: Session, category: schemas.CategoryCreate, checklist_id: int):
@@ -95,6 +98,9 @@ def delete_file(db: Session, file_id: int):
 # get functions
 def get_checklist(db: Session, checklist_id: int):
     return db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
+
+def get_public_checklist(db: Session, public_id: str):
+    return db.query(models.Checklist).filter(models.Checklist.public_id == public_id).first()
 
 def get_category(db: Session, category_id: int):
     return db.query(models.Category).filter(models.Category.id == category_id).first()

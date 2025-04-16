@@ -37,6 +37,7 @@ class CategoryOut(BaseModel):
 class ChecklistOut(BaseModel):
     id: int
     name: str
+    public_id: str
     categories: List[CategoryOut] = []
 
     class Config:
