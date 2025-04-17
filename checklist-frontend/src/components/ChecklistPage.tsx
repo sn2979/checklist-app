@@ -190,45 +190,133 @@ const ChecklistPage: React.FC = () => {
     ) : (
     <div className="d-flex align-items-center mb-3">
         <h2 className="me-3">{checklist.name}</h2>
-        <button className="btn btn-sm btn-outline-secondary" onClick={() => setRenamingName(true)}>
+        <button className="btn btn-sm btn-outline-secondary ms-2 me-2" onClick={() => setRenamingName(true)}>
         ✏️ Rename
         </button>
+        <button
+        className="btn btn-outline-info btn-sm"
+        onClick={() => navigator.clipboard.writeText(`http://localhost:3000/checklists/public/${checklist.public_id}`)}
+        >
+        🔗 Copy Public Link
+        </button>
+
+        <button
+            className="btn btn-outline-primary btn-sm ms-2"
+            data-bs-toggle="modal"
+            data-bs-target={`#addCategoryModal-${checklist.id}`}
+            >
+            ➕ Add Category
+          </button>
     </div>
+    
     )}
 
-    <button
-    className="btn btn-outline-info btn-sm"
-    onClick={() => navigator.clipboard.writeText(`http://localhost:3000/checklists/public/${checklist.public_id}`)}
-    >
-    🔗 Copy Public Link
-    </button>
 
 
-      <div className="d-flex mb-3">
-        <input
-            className="form-control me-2"
-            value={newCategoryName}
-            onChange={(e) => setNewCategoryName(e.target.value)}
-            placeholder="New category name"
-        />
-        <button className="btn btn-primary" onClick={handleAddCategory}>Add Category</button>
-       </div>
-
+          <div
+            className="modal fade"
+            id={`addCategoryModal-${checklist.id}`}
+            tabIndex={-1}
+            aria-labelledby={`addCategoryModalLabel-${checklist.id}`}
+            aria-hidden="true"
+            >
+            <div className="modal-dialog">
+                <div className="modal-content">
+                <div className="modal-header">
+                    <h5 className="modal-title" id={`addCategoryModalLabel-${checklist.id}`}>Add New Category</h5>
+                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+                </div>
+                <div className="modal-body">
+                    <input
+                    className="form-control"
+                    placeholder="Category name"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    />
+                </div>
+                <div className="modal-footer">
+                    <button className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button
+                    className="btn btn-primary"
+                    data-bs-dismiss="modal"
+                    onClick={() => handleAddCategory()}
+                    >
+                    Add
+                    </button>
+                </div>
+                </div>
+            </div>
+            </div>
 
       {checklist.categories.map(category => (
         <div key={category.id} className="mb-4">
           <h4>📂 {category.name}
             <button
-                className="btn btn-sm btn-outline-danger ms-2"
-                onClick={() => deleteCategory(checklist.id, category.id)}
-                >
-                🗑️
-            </button>
-            <button
                 className="btn btn-sm btn-outline-secondary ms-2"
                 onClick={() => toggleRenamingCategory(category.id)}
                 >
                 ✏️ Rename
+            </button>
+            <label className="btn btn-outline-secondary btn-sm ms-2">
+            📎 Upload File
+            <input
+                type="file"
+                hidden
+                onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) uploadCategoryFile(checklist.id, category.id, file);
+                }}
+            />
+            </label>
+            <button
+            className="btn btn-outline-primary btn-sm ms-2"
+            data-bs-toggle="modal"
+            data-bs-target={`#addItemModal-${category.id}`}
+            >
+            ➕ Add Item
+          </button>
+
+          <div
+            className="modal fade"
+            id={`addItemModal-${category.id}`}
+            tabIndex={-1}
+            aria-labelledby={`addItemModalLabel-${category.id}`}
+            aria-hidden="true"
+            >
+            <div className="modal-dialog">
+                <div className="modal-content">
+                <div className="modal-header">
+                    <h5 className="modal-title" id={`addItemModalLabel-${category.id}`}>Add New Item</h5>
+                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+                </div>
+                <div className="modal-body">
+                    <input
+                    className="form-control"
+                    placeholder="Item name"
+                    value={itemInputs[category.id] || ""}
+                    onChange={(e) =>
+                        setItemInputs({ ...itemInputs, [category.id]: e.target.value })
+                    }
+                    />
+                </div>
+                <div className="modal-footer">
+                    <button className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button
+                    className="btn btn-primary"
+                    data-bs-dismiss="modal"
+                    onClick={() => handleAddItem(checklist.id, category.id)}
+                    >
+                    Add
+                    </button>
+                </div>
+                </div>
+            </div>
+            </div>
+            <button
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={() => deleteCategory(checklist.id, category.id)}
+                >
+                🗑️
             </button>
           </h4>
           {renamingCategoryId === category.id ? (
@@ -244,18 +332,6 @@ const ChecklistPage: React.FC = () => {
         </div>
         ) : null}
 
-          
-
-          <input
-            type="file"
-            onChange={(e) => {
-                if (e.target.files && e.target.files.length > 0) {
-                const file = e.target.files[0];
-                uploadCategoryFile(checklist.id, category.id, file);
-                }
-            }}
-            className="form-control form-control-sm mb-2"
-            />
 
 
           {/* Files directly on the category */}
@@ -275,31 +351,10 @@ const ChecklistPage: React.FC = () => {
             </ul>
           )}
 
-        <div className="d-flex mt-2">
-            <input
-                className="form-control me-2"
-                value={itemInputs[category.id] || ""}
-                onChange={(e) => setItemInputs({ ...itemInputs, [category.id]: e.target.value })}
-                placeholder="New item name"
-            />
-            <button
-                className="btn btn-success"
-                onClick={() => handleAddItem(checklist.id, category.id)}
-            >
-                Add Item
-            </button>
-        </div>
-
           <ul className="list-group">
             {category.items.map(item => (
               <li key={item.id} className="list-group-item">
                 <strong>{item.name}</strong>
-                <button
-                className="btn btn-sm btn-outline-danger ms-2"
-                onClick={() => deleteItem(checklist.id, category.id, item.id)}
-                >
-                🗑️
-                </button>
                 <button
                 className="btn btn-sm btn-outline-secondary ms-2"
                 onClick={() => toggleRenamingItem(item.id)}
@@ -320,17 +375,25 @@ const ChecklistPage: React.FC = () => {
                 </div>
                 )}
 
-
+                <label className="btn btn-outline-secondary btn-sm ms-2">
+                📎 Upload File
                 <input
                     type="file"
+                    hidden
                     onChange={(e) => {
-                        if (e.target.files && e.target.files.length > 0) {
-                        const file = e.target.files[0];
-                        uploadItemFile(checklist.id, category.id, item.id, file);
-                        }
+                    const file = e.target.files?.[0];
+                    if (file) uploadItemFile(checklist.id, category.id, item.id, file);
                     }}
-                    className="form-control form-control-sm mt-2"
                 />
+                </label>
+
+                <button
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={() => deleteItem(checklist.id, category.id, item.id)}
+                >
+                🗑️
+                </button>
+
 
                 {item.files.length > 0 && (
                   <ul>
@@ -351,6 +414,8 @@ const ChecklistPage: React.FC = () => {
               </li>
             ))}
           </ul>
+
+
         </div>
       ))}
     </div>

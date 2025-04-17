@@ -13,7 +13,7 @@ const ChecklistPage: React.FC = () => {
       .then(response => {
         console.log("Fetched checklist:", response.data);
         setChecklist(response.data);
-        document.title = response.data.name;
+        document.title = response.data.name + " - Public";
       })
       .catch(error => {
         console.error("Error fetching checklist:", error);
@@ -58,18 +58,19 @@ const ChecklistPage: React.FC = () => {
         <h2>{checklist.name}</h2>
       {checklist.categories.map(category => (
         <div key={category.id} className="mb-4">
-          <h4>📂 {category.name}</h4>
-
-          <input
-            type="file"
-            onChange={(e) => {
-                if (e.target.files && e.target.files.length > 0) {
-                const file = e.target.files[0];
-                uploadCategoryFile(checklist.public_id, category.id, file);
-                }
-            }}
-            className="form-control form-control-sm mb-2"
-            />
+          <h4>📂 {category.name}
+          <label className="btn btn-outline-secondary btn-sm ms-4">
+                📎 Upload File
+                <input
+                    type="file"
+                    hidden
+                    onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadCategoryFile(checklist.public_id, category.id, file);
+                    }}
+                />
+            </label>
+          </h4>
 
 
           {/* Files directly on the category */}
@@ -92,16 +93,17 @@ const ChecklistPage: React.FC = () => {
                 <strong>{item.name}</strong>
 
 
+                <label className="btn btn-outline-secondary btn-sm ms-3">
+                📎 Upload File
                 <input
                     type="file"
+                    hidden
                     onChange={(e) => {
-                        if (e.target.files && e.target.files.length > 0) {
-                        const file = e.target.files[0];
-                        uploadItemFile(checklist.public_id, category.id, item.id, file);
-                        }
+                    const file = e.target.files?.[0];
+                    if (file) uploadItemFile(checklist.public_id, category.id, item.id, file);
                     }}
-                    className="form-control form-control-sm mt-2"
                 />
+                </label>
 
                 {item.files.length > 0 && (
                   <ul>
