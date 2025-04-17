@@ -195,6 +195,14 @@ const ChecklistPage: React.FC = () => {
     </div>
     )}
 
+    <button
+    className="btn btn-outline-info btn-sm"
+    onClick={() => navigator.clipboard.writeText(`http://localhost:3000/checklists/public/${checklist.public_id}`)}
+    >
+    🔗 Copy Public Link
+    </button>
+
+
       <div className="d-flex mb-3">
         <input
             className="form-control me-2"

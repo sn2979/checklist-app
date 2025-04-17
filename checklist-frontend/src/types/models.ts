@@ -19,7 +19,7 @@ export interface File {
   export interface Checklist {
     id: number;
     name: string;
-    public_url: string;
+    public_id: string;
     categories: Category[];
   }
   
