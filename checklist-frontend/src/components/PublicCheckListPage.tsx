@@ -13,6 +13,7 @@ const ChecklistPage: React.FC = () => {
       .then(response => {
         console.log("Fetched checklist:", response.data);
         setChecklist(response.data);
+        document.title = response.data.name;
       })
       .catch(error => {
         console.error("Error fetching checklist:", error);

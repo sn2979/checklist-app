@@ -22,6 +22,7 @@ const ChecklistPage: React.FC = () => {
         console.log("Fetched checklist:", response.data);
         setChecklist(response.data);
         setChecklistName(response.data.name);  // populate editable name
+        document.title = response.data.name;
       })
       .catch(error => {
         console.error("Error fetching checklist:", error);
