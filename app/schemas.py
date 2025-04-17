@@ -46,3 +46,6 @@ class ChecklistOut(BaseModel):
 class RenameRequest(BaseModel):
     name: str
 
+class CloneRequest(BaseModel):
+    name: Optional[str] = None
+

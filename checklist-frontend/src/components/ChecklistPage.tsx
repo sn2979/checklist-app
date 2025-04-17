@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Checklist } from '../types/models';
 
@@ -14,6 +14,7 @@ const ChecklistPage: React.FC = () => {
   const [renamingItemName, setRenamingItemName] = useState("");
   const [renamingName, setRenamingName] = useState(false);
   const [checklistName, setChecklistName] = useState("");
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -178,6 +179,10 @@ const ChecklistPage: React.FC = () => {
 
   return (
     <div className="container mt-4">
+        <button className="btn btn-outline-secondary mb-3" onClick={() => navigate("/")}>
+        ⬅️ Back to My Checklists
+        </button>
+
         {renamingName ? (
     <div className="d-flex mb-3">
         <input

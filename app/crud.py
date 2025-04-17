@@ -34,13 +34,20 @@ def create_file_url(db: Session, file_url, item_id: int = None, category_id: int
     return db_file
 
 # clone checklist
-def clone_checklist(db: Session, checklist_id: int):
+def clone_checklist(db: Session, checklist_id: int, new_name: str = None):
     original = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
     if not original:
         return None
     
-    new_checklist = models.Checklist(name=f"Copy of {original.name}")
+    if not new_name:
+        new_name = "Copy of " + original.name
+    new_checklist = models.Checklist(name=new_name)
     db.add(new_checklist)
+    db.commit()
+    db.refresh(new_checklist)
+
+    # generate a new public_id
+    new_checklist.public_id = f"{uuid7().hex}"
     db.commit()
     db.refresh(new_checklist)
 

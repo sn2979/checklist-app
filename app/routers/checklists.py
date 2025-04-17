@@ -89,9 +89,9 @@ async def public_upload_to_category_file(category_id: int, file: UploadFile = Fi
     return crud.create_file_url(db, mock_url, category_id=category_id)
 
 # clone checklist
-@router.post("{checklist_id}/clone", response_model=schemas.ChecklistOut)
-def clone_checklist(checklist_id: int, db: Session = Depends(get_db)):
-    checklist = crud.clone_checklist(db, checklist_id)
+@router.post("/{checklist_id}/clone", response_model=schemas.ChecklistOut)
+def clone_checklist(checklist_id: int, request: schemas.CloneRequest, db: Session = Depends(get_db)):
+    checklist = crud.clone_checklist(db, checklist_id, request.name)
     if not checklist:
         raise HTTPException(status_code=404, detail="Checklist not found")
     return checklist

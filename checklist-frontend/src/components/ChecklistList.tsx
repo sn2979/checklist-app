@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState} from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Checklist } from '../types/models';
 import { Modal } from 'bootstrap';
 
@@ -9,6 +9,9 @@ const ChecklistList: React.FC = () => {
   const [newName, setNewName] = useState("");
   const [renamingChecklistId, setRenamingChecklistId] = useState<number | null>(null);
   const [renamingChecklistName, setRenamingChecklistName] = useState<string>("");
+  const [cloneNames, setCloneNames] = useState<{ [id: number]: string }>({});
+  const navigate = useNavigate();
+
 
   // changes the title
   useEffect(() => {
@@ -65,6 +68,21 @@ const ChecklistList: React.FC = () => {
         modal?.hide();
       });
   };
+
+  const handleCloneChecklist = (originalId: number) => {
+    const name = cloneNames[originalId] || "Copy of " + checklists.find(c => c.id === originalId)?.name;
+  
+    axios
+      .post(`http://localhost:8000/checklists/${originalId}/clone`, { name })
+      .then((res) => {
+        const newChecklist = res.data;
+        navigate(`/checklists/${newChecklist.id}`);
+      })
+      .catch((err) => {
+        console.error("Error cloning checklist:", err);
+      });
+  };
+  
   
 
   return (
@@ -153,14 +171,59 @@ const ChecklistList: React.FC = () => {
                     >
                     🗑️ Delete
                     </button>
-                    {/* Placeholder for clone button later */}
+                    <button
+                    className="btn btn-sm btn-outline-secondary"
+                    data-bs-toggle="modal"
+                    data-bs-target={`#cloneChecklistModal-${checklist.id}`}
+                    >
+                    🌀 Clone
+                    </button>
+
+                </div>
+                </div>
+                <div
+                    className="modal fade"
+                    id={`cloneChecklistModal-${checklist.id}`}
+                    tabIndex={-1}
+                    aria-labelledby={`cloneChecklistModalLabel-${checklist.id}`}
+                    aria-hidden="true"
+                    >
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id={`cloneChecklistModalLabel-${checklist.id}`}>
+                            Clone Checklist
+                            </h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" />
+                        </div>
+                        <div className="modal-body">
+                            <input
+                            type="text"
+                            className="form-control"
+                            placeholder={`Copy of ${checklist.name}`}
+                            value={cloneNames[checklist.id]}
+                            onChange={(e) =>
+                                setCloneNames({ ...cloneNames, [checklist.id]: e.target.value })
+                            }
+                            />
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button
+                            className="btn btn-primary"
+                            data-bs-dismiss="modal"
+                            onClick={() => handleCloneChecklist(checklist.id)}
+                            >
+                            Clone
+                            </button>
+                        </div>
+                        </div>
                 </div>
                 </div>
             </div>
             </div>
         ))}
         </div>
-
     </div>
   );
 };
