@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Checklist } from '../types/models';
 
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || "localhost:8000";
 const ChecklistPage: React.FC = () => {
   const { id } = useParams();  // React Router grabs the ID from the URL
   const [checklist, setChecklist] = useState<Checklist | null>(null);
@@ -18,7 +19,7 @@ const ChecklistPage: React.FC = () => {
 
 
   useEffect(() => {
-    axios.get(`http://127.0.0.1:8000/checklists/${id}`)
+    axios.get(`http://${BASE_URL}/checklists/${id}`)
       .then(response => {
         console.log("Fetched checklist:", response.data);
         setChecklist(response.data);
@@ -35,11 +36,11 @@ const ChecklistPage: React.FC = () => {
   const handleAddCategory = () => {
     if (!newCategoryName) return;
 
-    axios.post(`http://localhost:8000/checklists/${id}/categories/`, {
+    axios.post(`http://${BASE_URL}/checklists/${id}/categories/`, {
         name: newCategoryName,
     }).then(() => {
         setNewCategoryName("");
-        axios.get(`http://localhost:8000/checklists/${id}`)
+        axios.get(`http://${BASE_URL}/checklists/${id}`)
         .then(res => setChecklist(res.data));
     });
    };
@@ -48,11 +49,11 @@ const ChecklistPage: React.FC = () => {
     const name = itemInputs[categoryId];
     if (!name) return;
   
-    axios.post(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/items/`, {
+    axios.post(`http://${BASE_URL}/checklists/${checklistId}/categories/${categoryId}/items/`, {
       name: name
     }).then(() => {
       setItemInputs({ ...itemInputs, [categoryId]: "" });
-      axios.get(`http://localhost:8000/checklists/${id}`)
+      axios.get(`http://${BASE_URL}/checklists/${id}`)
         .then(res => setChecklist(res.data));
     });
   };
@@ -64,12 +65,12 @@ const ChecklistPage: React.FC = () => {
   };
   
   const handleRenameCategory = (checklistId: number, categoryId: number) => {
-    axios.put(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}`, {
+    axios.put(`http://{${BASE_URL}}/checklists/${checklistId}/categories/${categoryId}`, {
       name: renamingCategoryName
     }).then(() => {
       setRenamingCategoryId(null);
       setRenamingCategoryName("");
-      axios.get(`http://localhost:8000/checklists/${id}`)
+      axios.get(`http://${BASE_URL}/checklists/${id}`)
         .then(res => setChecklist(res.data));
     });
   };
@@ -81,18 +82,18 @@ const ChecklistPage: React.FC = () => {
   };
   
   const handleRenameItem = (checklistId: number, categoryId: number, itemId: number) => {
-    axios.put(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/items/${itemId}`, {
+    axios.put(`http://${BASE_URL}/checklists/${checklistId}/categories/${categoryId}/items/${itemId}`, {
       name: renamingItemName
     }).then(() => {
       setRenamingItemId(null);
       setRenamingItemName("");
-      axios.get(`http://localhost:8000/checklists/${id}`)
+      axios.get(`http://${BASE_URL}/checklists/${id}`)
         .then(res => setChecklist(res.data));
     });
   };
 
   const handleChecklistRename = () => {
-    axios.put(`http://localhost:8000/checklists/${id}`, {
+    axios.put(`http://${BASE_URL}/checklists/${id}`, {
       name: checklistName
     }).then(res => {
       setChecklist(res.data);
@@ -106,10 +107,10 @@ const ChecklistPage: React.FC = () => {
     const formData = new FormData();
     formData.append("file", file);
   
-    axios.post(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/items/${itemId}/upload`, formData)
+    axios.post(`http://${BASE_URL}/checklists/${checklistId}/categories/${categoryId}/items/${itemId}/upload`, formData)
       .then(response => {
         console.log("File uploaded:", response.data);
-        axios.get(`http://localhost:8000/checklists/${id}`)
+        axios.get(`http://${BASE_URL}/checklists/${id}`)
           .then(res => setChecklist(res.data));
       })
       .catch(error => {
@@ -121,9 +122,9 @@ const ChecklistPage: React.FC = () => {
     const formData = new FormData();
     formData.append("file", file);
   
-    axios.post(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/upload`, formData)
+    axios.post(`http://${BASE_URL}/checklists/${checklistId}/categories/${categoryId}/upload`, formData)
       .then(() => {
-        axios.get(`http://localhost:8000/checklists/${id}`)
+        axios.get(`http://${BASE_URL}/checklists/${id}`)
           .then(res => setChecklist(res.data));
       })
       .catch(error => {
@@ -135,10 +136,10 @@ const ChecklistPage: React.FC = () => {
     const confirmed = window.confirm("Are you sure you want to delete this file?");
     if (!confirmed) return;
 
-    axios.delete(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/items/${itemId}/files/${fileId}`)
+    axios.delete(`http://${BASE_URL}/checklists/${checklistId}/categories/${categoryId}/items/${itemId}/files/${fileId}`)
       .then(() => {
         // Refetch the checklist after deletion
-        axios.get(`http://localhost:8000/checklists/${id}`)
+        axios.get(`http://${BASE_URL}/checklists/${id}`)
           .then(res => setChecklist(res.data));
       })
       .catch(error => {
@@ -150,10 +151,10 @@ const ChecklistPage: React.FC = () => {
     const confirmed = window.confirm("Are you sure you want to delete this file?");
     if (!confirmed) return;
 
-    axios.delete(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/files/${fileId}`)
+    axios.delete(`http://${BASE_URL}/checklists/${checklistId}/categories/${categoryId}/files/${fileId}`)
       .then(() => {
         // Refetch the checklist after deletion
-        axios.get(`http://localhost:8000/checklists/${id}`)
+        axios.get(`http://${BASE_URL}/checklists/${id}`)
           .then(res => setChecklist(res.data));
       })
       .catch(error => {
@@ -164,16 +165,16 @@ const ChecklistPage: React.FC = () => {
   const deleteCategory = (checklistId: number, categoryId: number) => {
     if (!window.confirm("Are you sure you want to delete this category?")) return;
   
-    axios.delete(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}`)
-      .then(() => axios.get(`http://localhost:8000/checklists/${id}`))
+    axios.delete(`http://${BASE_URL}/checklists/${checklistId}/categories/${categoryId}`)
+      .then(() => axios.get(`http://${BASE_URL}/checklists/${id}`))
       .then(res => setChecklist(res.data));
   };
   
   const deleteItem = (checklistId: number, categoryId: number, itemId: number) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
   
-    axios.delete(`http://localhost:8000/checklists/${checklistId}/categories/${categoryId}/items/${itemId}`)
-      .then(() => axios.get(`http://localhost:8000/checklists/${id}`))
+    axios.delete(`http://${BASE_URL}/checklists/${checklistId}/categories/${categoryId}/items/${itemId}`)
+      .then(() => axios.get(`http://${BASE_URL}/checklists/${id}`))
       .then(res => setChecklist(res.data));
   };
 

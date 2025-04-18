@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .                         
+      dockerfile: checklist-backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./checklist-backend:/app
+    restart: always
+
+  frontend:
+    build:
+      context: ./checklist-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./checklist-frontend:/app
+    restart: always

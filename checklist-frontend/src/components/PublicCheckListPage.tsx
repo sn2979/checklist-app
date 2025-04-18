@@ -3,17 +3,18 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Checklist } from '../types/models';
 
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'localhost:8000'; // Default to localhost if not set
 const ChecklistPage: React.FC = () => {
-  const { publicId } = useParams();  // React Router grabs the public ID from the URL
+  const { publicId } = useParams();  
   const [checklist, setChecklist] = useState<Checklist | null>(null);
 
 
   useEffect(() => {
-    axios.get(`http://127.0.0.1:8000/checklists/public/${publicId}`)
+    axios.get(`http://${BASE_URL}/checklists/public/${publicId}`)
       .then(response => {
         console.log("Fetched checklist:", response.data);
         setChecklist(response.data);
-        document.title = response.data.name + " - Public";
+        document.title = response.data.name + " -Public";
       })
       .catch(error => {
         console.error("Error fetching checklist:", error);
@@ -27,10 +28,10 @@ const ChecklistPage: React.FC = () => {
     const formData = new FormData();
     formData.append("file", file);
   
-    axios.post(`http://localhost:8000/checklists/public/${publicId}/categories/${categoryId}/items/${itemId}/upload`, formData)
+    axios.post(`http://${BASE_URL}/checklists/public/${publicId}/categories/${categoryId}/items/${itemId}/upload`, formData)
       .then(response => {
         console.log("File uploaded:", response.data);
-        axios.get(`http://localhost:8000/checklists/public/${publicId}`)
+        axios.get(`http://${BASE_URL}/checklists/public/${publicId}`)
           .then(res => setChecklist(res.data));
       })
       .catch(error => {
@@ -42,9 +43,9 @@ const ChecklistPage: React.FC = () => {
     const formData = new FormData();
     formData.append("file", file);
   
-    axios.post(`http://localhost:8000/checklists/${publicId}/categories/${categoryId}/upload`, formData)
+    axios.post(`http://${BASE_URL}/checklists/${publicId}/categories/${categoryId}/upload`, formData)
       .then(() => {
-        axios.get(`http://localhost:8000/checklists/public/${publicId}`)
+        axios.get(`http://${BASE_URL}/checklists/public/${publicId}`)
           .then(res => setChecklist(res.data));
       })
       .catch(error => {

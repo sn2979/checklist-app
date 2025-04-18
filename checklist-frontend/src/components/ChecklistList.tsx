@@ -4,7 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Checklist } from '../types/models';
 import { Modal } from 'bootstrap';
 
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'localhost:8000'; // Default to localhost if not set
 const ChecklistList: React.FC = () => {
+ 
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [newName, setNewName] = useState("");
   const [renamingChecklistId, setRenamingChecklistId] = useState<number | null>(null);
@@ -20,7 +22,7 @@ const ChecklistList: React.FC = () => {
   
   // Fetch all checklists from backend
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/checklists/')
+    axios.get(`http://${BASE_URL}/checklists/`)
       .then(response => {
         console.log("Fetched checklists:", response.data);
         setChecklists(response.data);
@@ -36,7 +38,7 @@ const ChecklistList: React.FC = () => {
   };
   
   const handleRenameChecklist = (checklistId: number) => {
-    axios.put(`http://localhost:8000/checklists/${checklistId}`, {
+    axios.put(`http://${BASE_URL}/checklists/${checklistId}`, {
       name: renamingChecklistName,
     }).then((res) => {
       setChecklists(checklists.map(cl =>
@@ -48,7 +50,7 @@ const ChecklistList: React.FC = () => {
   };
 
   const deleteChecklist = (id: number) => {
-    axios.delete(`http://127.0.0.1:8000/checklists/${id}`)
+    axios.delete(`http://${BASE_URL}/checklists/${id}`)
       .then(() => {
         setChecklists(checklists.filter(c => c.id !== id));
       });
@@ -57,7 +59,7 @@ const ChecklistList: React.FC = () => {
   const handleModalCreate = () => {
     if (!newName.trim()) return;
   
-    axios.post('http://127.0.0.1:8000/checklists/', { name: newName })
+    axios.post(`http://${BASE_URL}/checklists/`, { name: newName })
       .then(response => {
         setChecklists([...checklists, response.data]);
         setNewName("");
@@ -73,7 +75,7 @@ const ChecklistList: React.FC = () => {
     const name = cloneNames[originalId] || "Copy of " + checklists.find(c => c.id === originalId)?.name;
   
     axios
-      .post(`http://localhost:8000/checklists/${originalId}/clone`, { name })
+      .post(`http://${BASE_URL}/checklists/${originalId}/clone`, { name })
       .then((res) => {
         const newChecklist = res.data;
         navigate(`/checklists/${newChecklist.id}`);
@@ -201,7 +203,7 @@ const ChecklistList: React.FC = () => {
                             type="text"
                             className="form-control"
                             placeholder={`Copy of ${checklist.name}`}
-                            value={cloneNames[checklist.id]}
+                            value={cloneNames[checklist.id] || ""}
                             onChange={(e) =>
                                 setCloneNames({ ...cloneNames, [checklist.id]: e.target.value })
                             }
