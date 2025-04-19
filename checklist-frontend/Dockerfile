@@ -12,5 +12,5 @@ RUN npm run build
 
 RUN npm install -g serve
 
-# ✅ This is the most important line
+
 CMD ["serve", "-s", "build"]

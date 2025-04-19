@@ -21,6 +21,7 @@ The API will run at http://localhost:8000
 
 ###  Docker
 Run these commands within the checklist-backend folder:
+
 ```bash
 docker build -t checklist-backend .
 docker run -p 8000:8000 checklist-backend

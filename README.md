@@ -13,12 +13,15 @@ docker compose up --build
 ```
 
 The app will be available at:
+
 Frontend: http://localhost:3000 and Backend: http://localhost:8000
 
 
 ## Technologies
 Backend: FastAPI, SQLAlchemy, SQLite
+
 Frontend: React, Typescript, Bootstrap
+
 Containerization: Docker, Docker Compose
 
 

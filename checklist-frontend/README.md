@@ -17,6 +17,7 @@ npm start
 ```
 
 The app will run at http://localhost:3000
+
 Make sure that the backend is running at http://localhost:8000 . If it isn't, modify BASE_URL in the .env file as appropriate
 
 ###  Docker
